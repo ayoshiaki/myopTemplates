@@ -67,6 +67,7 @@ my $stop_offset_begin = ($fixed_stop_offset);
 my $donor_offset_begin = ($fixed_donor_offset);
 my $acceptor_offset_end = ($exon_length_acceptor);
 
+my $global_id = 1;
 
 while (my $seq = <STDIN>)
 {
@@ -95,18 +96,18 @@ while (my $seq = <STDIN>)
     push @sequence, "+_+_+_+_+_+_+";
     my $frame = 0;
     my $length = 0;
-    my $id = 0;
+
 
     for(my $i = 1; $i < scalar(@sequence)-1; $i++)
     {
-        if(!($sequence[$i] eq $current_state)){
-            my $nameid = "MYOP."."$name".".t$id";
+      if(!($sequence[$i] eq $current_state)){
+        my $nameid = "MYOP."."$name".".$global_id";
             if($current_state eq "start") {
                 $frame  = 0;
                 print "$name\tmyop\tstart_codon\t".($begin + $start_offset_begin+1)."\t".($begin + $start_offset_begin+3)."\t.\t+\t".$frame."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n";
             } elsif( $current_state eq "stop") {
                 print "$name\tmyop\tstop_codon\t".($begin + $stop_offset_begin+1)."\t".($begin + $stop_offset_begin+3)."\t.\t+\t".((3-$frame)%3)."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n\n";
-                $id ++;
+                $global_id ++;
             } elsif ( $current_state =~ m/^EI(\d)/) {
                 $frame =  0;
                 print "$name\tmyop\tCDS\t".($begin - $start_offset_end + 1)."\t".($i + $donor_offset_begin )."\t.\t+\t".$frame."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n";
@@ -123,7 +124,7 @@ while (my $seq = <STDIN>)
                 $frame = 0;
                 print "$name\tmyop\tCDS\t".($begin - $start_offset_end+1)."\t".($i + $stop_offset_begin )."\t.\t+\t".$frame."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n";
             }  elsif($current_state =~m/rstop/) {
-                $i = process_reverse_strand($name, \@sequence, $begin,  \$id);
+                $i = process_reverse_strand($name, \@sequence, $begin,  \$global_id);
             }
             $begin = $i;
             $current_state = $sequence[$i];
@@ -157,9 +158,9 @@ sub process_reverse_strand {
     for(my $j = $begin_of_gene; $j >= $i-1; $j--)
     {
         if(!($sequence[$j] eq $current_state)) {
-            my $nameid = "MYOP."."$name".".t$$idref";
+            my $nameid = "MYOP."."$name".".$global_id";
             if($current_state eq "rstart") {
-                $frame = 0;
+              $frame = 0;
                 push @output, "$name\tmyop\tstart_codon\t".($begin - $start_offset_begin - 1)."\t".($begin - $start_offset_begin +1 )."\t.\t-\t".$frame."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n\n";
             } elsif( $current_state eq "rstop") {
                 $frame = 0;
