@@ -418,7 +418,7 @@ rdon1 = [ observation = rdonor1_model
 rdon2 = [ observation = rdonor2_model
           sequence_length = $donor_signal_length ]
 EOF
-open (GHMM, ">ghmm/model/ghmm_intron_short.model") or die "model/ghmm_intron_short.model: $!";
+open (GHMM, ">ghmm/model/ghmm_fixed_transition.model") or die "model/ghmm_fixed_transition.model: $!";
 print GHMM $ghmm;
 close(GHMM);
 
@@ -427,26 +427,7 @@ close(GHMM);
 my $final_state_prob =9.95e-5;
 
 
-my %estimated;
-open (MODEL, "< ghmm/model/states.model" ) ;
-foreach my $line (<MODEL>) {
-    if($line =~ m/\|/) {
-        $line =~ s/\s//g;
-        $line =~ s/;//g;
-        $line =~ s/#leaf//g;
-        if(!($line  =~ m/0;/))
-        {
-            my ($trans, $probs) = split(":", $line);
-            $estimated{$trans} = $probs;
-        }
-    }
-}
-close(MODEL);
-
-my $genes_forward = `cat dataset/train.gtf | grep "+" | wc -l`;
-my $genes_reverse = `cat dataset/train.gtf | grep "-" | wc -l`;
-my $pforward = ($genes_forward + 0.5) / ($genes_reverse + $genes_forward + 1.0);
-
+my $pforward = 0.5;
 my $intron_lengths =`myop-sequence_length.pl < ghmm/dataset/intron.fasta`;
 $intron_lengths =~ s/(.+):\t//g;
 my @intron_lengths = split(/\s/, $intron_lengths);
@@ -460,7 +441,7 @@ my %counter;
 my $max_intron_length = -10;
 my $sum_intron_length = 0;
 foreach my $l (@intron_lengths)
- {
+{
     $counter{$l} ++;
     if($l > 0) {
       $sum_intron_length += $l;
@@ -514,9 +495,6 @@ print STDERR "P(L=d) = $pd\n";
 print STDERR "P(L=d+1) = $pd1\n";
 
 my %transitions;
-if ($estimated{make_transition_str("start", "ES")} == 0) {
-    system ("cp model/initial.model model/single.model");
-}
 
 
 $transitions{make_transition_str("don0", "Is0")} = $pshort;
@@ -569,28 +547,28 @@ $transitions{make_transition_str( "N", "F" )} = $final_state_prob;
 $transitions{make_transition_str( "stop", "N" )} = 1;
 $transitions{make_transition_str( "rstart", "N" ) }= 1;
 
-$transitions{make_transition_str("start","ES")} = $estimated{make_transition_str("start", "ES")};
+$transitions{make_transition_str("start","ES")} = 0.1;
 $transitions{make_transition_str("ES","stop")} = 1.0;
-$transitions{make_transition_str("rstop","rES")} = $estimated{make_transition_str("start", "ES")};
+$transitions{make_transition_str("rstop","rES")} = 0.1;
 $transitions{make_transition_str("rES","rstart")} = 1.0;
-$transitions{make_transition_str("start", "EI0")} = $estimated{make_transition_str("start","EI0")};
-$transitions{make_transition_str("start", "EI1")} = $estimated{make_transition_str("start","EI1")};
-$transitions{make_transition_str("start", "EI2")} = $estimated{make_transition_str("start","EI2")};
+$transitions{make_transition_str("start", "EI0")} = 0.9/3;
+$transitions{make_transition_str("start", "EI1")} = 0.9/3;
+$transitions{make_transition_str("start", "EI2")} = 0.9/3;
 $transitions{make_transition_str("EI0", "don1")} = 1.0;
 $transitions{make_transition_str("EI1", "don2")} = 1.0;
 $transitions{make_transition_str("EI2", "don0")} = 1.0;
-$transitions{make_transition_str("acc0", "ET0")} = $estimated{make_transition_str("acc0","ET0")};
-$transitions{make_transition_str("acc0", "E00")} = $estimated{make_transition_str("acc0","E00")};
-$transitions{make_transition_str("acc0", "E01")} = $estimated{make_transition_str("acc0","E01")};
-$transitions{make_transition_str("acc0", "E02")} = $estimated{make_transition_str("acc0","E02")};
-$transitions{make_transition_str("acc1", "ET1")} = $estimated{make_transition_str("acc1","ET1")};
-$transitions{make_transition_str("acc1", "E10")} = $estimated{make_transition_str("acc1","E10")};
-$transitions{make_transition_str("acc1", "E11")} = $estimated{make_transition_str("acc1","E11")};
-$transitions{make_transition_str("acc1", "E12")} = $estimated{make_transition_str("acc1","E12")};
-$transitions{make_transition_str("acc2", "ET2")} = $estimated{make_transition_str("acc2","ET2")};
-$transitions{make_transition_str("acc2", "E20")} = $estimated{make_transition_str("acc2","E20")};
-$transitions{make_transition_str("acc2", "E21")} = $estimated{make_transition_str("acc2","E21")};
-$transitions{make_transition_str("acc2", "E22")} = $estimated{make_transition_str("acc2","E22")};
+$transitions{make_transition_str("acc0", "ET0")} = 0.1;
+$transitions{make_transition_str("acc0", "E00")} = 0.3;
+$transitions{make_transition_str("acc0", "E01")} = 0.3;
+$transitions{make_transition_str("acc0", "E02")} = 0.3;
+$transitions{make_transition_str("acc1", "ET1")} = 0.1;
+$transitions{make_transition_str("acc1", "E10")} = 0.3;
+$transitions{make_transition_str("acc1", "E11")} = 0.3;
+$transitions{make_transition_str("acc1", "E12")} = 0.3;
+$transitions{make_transition_str("acc2", "ET2")} = 0.1;
+$transitions{make_transition_str("acc2", "E20")} = 0.3;
+$transitions{make_transition_str("acc2", "E21")} = 0.3;
+$transitions{make_transition_str("acc2", "E22")} = 0.3;
 $transitions{make_transition_str("ET0", "stop")} = 1.0;
 $transitions{make_transition_str("ET1", "stop")} = 1.0;
 $transitions{make_transition_str("ET2", "stop")} = 1.0;
@@ -603,28 +581,28 @@ $transitions{make_transition_str("E12", "don0")} = 1.0;
 $transitions{make_transition_str("E20", "don1")} = 1.0;
 $transitions{make_transition_str("E21", "don2")} = 1.0;
 $transitions{make_transition_str("E22", "don0")} = 1.0;
-$transitions{make_transition_str("rstop","rET0")} = $estimated{make_transition_str("rstop","rET0")};
-$transitions{make_transition_str("rstop","rET1")} = $estimated{make_transition_str("rstop","rET1")};
-$transitions{make_transition_str("rstop","rET2")} = $estimated{make_transition_str("rstop","rET2")};
+$transitions{make_transition_str("rstop","rET0")} = 0.3;
+$transitions{make_transition_str("rstop","rET1")} = 0.3;
+$transitions{make_transition_str("rstop","rET2")} = 0.3;
 
 $transitions{make_transition_str("rET2","racc2")} = 1.0;
 $transitions{make_transition_str("rET0","racc0")} = 1.0;
 $transitions{make_transition_str("rET1","racc1")} = 1.0;
 
-$transitions{make_transition_str("rdon1","rEI0")} = $estimated{make_transition_str("rdon1","rEI0")};
-$transitions{make_transition_str("rdon1","rE00")} = $estimated{make_transition_str("rdon1","rE00")};
-$transitions{make_transition_str("rdon1","rE01")} = $estimated{make_transition_str("rdon1","rE01")};
-$transitions{make_transition_str("rdon1","rE02")} = $estimated{make_transition_str("rdon1","rE02")};
+$transitions{make_transition_str("rdon1","rEI0")} = 0.1;
+$transitions{make_transition_str("rdon1","rE00")} = 0.3;
+$transitions{make_transition_str("rdon1","rE01")} = 0.3;
+$transitions{make_transition_str("rdon1","rE02")} = 0.3;
 
-$transitions{make_transition_str("rdon0","rEI2")} = $estimated{make_transition_str("rdon0","rEI2")};
-$transitions{make_transition_str("rdon0","rE20")} = $estimated{make_transition_str("rdon0","rE20")};
-$transitions{make_transition_str("rdon0","rE21")} = $estimated{make_transition_str("rdon0","rE21")};
-$transitions{make_transition_str("rdon0","rE22")} = $estimated{make_transition_str("rdon0","rE22")};
+$transitions{make_transition_str("rdon0","rEI2")} = 0.1;
+$transitions{make_transition_str("rdon0","rE20")} = 0.3;
+$transitions{make_transition_str("rdon0","rE21")} = 0.3;
+$transitions{make_transition_str("rdon0","rE22")} = 0.3;
 
-$transitions{make_transition_str("rdon2","rEI1")} = $estimated{make_transition_str("rdon2","rEI1")};
-$transitions{make_transition_str("rdon2","rE10")} = $estimated{make_transition_str("rdon2","rE10")};
-$transitions{make_transition_str("rdon2","rE11")} = $estimated{make_transition_str("rdon2","rE11")};
-$transitions{make_transition_str("rdon2","rE12")} = $estimated{make_transition_str("rdon2","rE12")};
+$transitions{make_transition_str("rdon2","rEI1")} = 0.1;
+$transitions{make_transition_str("rdon2","rE10")} = 0.3;
+$transitions{make_transition_str("rdon2","rE11")} = 0.3;
+$transitions{make_transition_str("rdon2","rE12")} = 0.3;
 
 $transitions{make_transition_str("rE00","racc0")} = 1.0;
 $transitions{make_transition_str("rE01","racc1")} = 1.0;
@@ -672,8 +650,8 @@ foreach my $line (<GHMM>) {
 close(GHMM2);
 close(GHMM);
 
-system("rm ghmm/model/ghmm_intron_short.model");
-system("mv ghmm/model/ghmm_final.model ghmm/model/ghmm_intron_short.model");
+system("rm ghmm/model/ghmm_fixed_transition.model");
+system("mv ghmm/model/ghmm_final.model ghmm/model/ghmm_fixed_transition.model");
 
 
 sub make_transition_str {
