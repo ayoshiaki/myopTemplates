@@ -621,7 +621,7 @@ $transitions{make_transition_str("rEI2","rstart")} = 1.0;
 
 
 open (GHMM2, ">ghmm/model/ghmm_final.model") or die "$!";
-open (GHMM, "<ghmm/model/ghmm_intron_short.model") or die "$!";
+open (GHMM, "<ghmm/model/ghmm_fixed_transition.model") or die "$!";
 my $reading_trans = 0;
 foreach my $line (<GHMM>) {
   if ($line =~ m/transitions =/) {
