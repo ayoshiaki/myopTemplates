@@ -95,7 +95,6 @@ while (my $seq = <STDIN>)
       $name =~ s/\s/_/g;
       my $str = $seqentry[1];
       @sequence = split(/ /, $str);
-      print STDERR "<$name>"."<$str>\n";
     }
     my $current_state = $sequence[0];
     my $begin = 0;
