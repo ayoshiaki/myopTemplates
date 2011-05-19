@@ -2,14 +2,13 @@
 
 use strict;
 use warnings;
-
 use Getopt::Long;
+my $first_position = 0;
 
-
-my $metaparfile = "../cnf/meta.cnf";
-my $configdir = "ghmm/cnf/";
-my $ncpu = 1;
-
+my $metaparfile = "./cnf/meta.cnf";
+# make it unbuffered
+select STDIN; $| = 1;
+select STDOUT; $| = 1;
 
 my %metapar;
 # read metaparameters file
@@ -67,10 +66,12 @@ my $stop_offset_begin = ($fixed_stop_offset);
 my $donor_offset_begin = ($fixed_donor_offset);
 my $acceptor_offset_end = ($exon_length_acceptor);
 
-my $global_id = 1;
 
+my $id = 0;
 while (my $seq = <STDIN>)
 {
+
+
     my $name;
     my @sequence;
     if($seq =~ m/^>(.*)/) {
@@ -82,14 +83,19 @@ while (my $seq = <STDIN>)
         chomp($str);
         @sequence = split(/ /, $str);
     } else {
-        my @seqentry = split(/:\t/, $seq);
-        $name = $seqentry[0];
-        my @names = split(/:/, $name);
-        $name = $names[0];
-        $name =~ s/\s/_/g;
-        my $str = $seqentry[1];
-        @sequence = split(/ /, $str);
-
+      $seq =~ /(<.+>),(.+)/;
+      my $id = $1;
+      my $seq2 = $2;
+      $id =~ /(.+):(\d+),(\d+)/;
+      $first_position = ($2-1);
+      my @seqentry = split(/:\t/, $seq2);
+      $name = $seqentry[0];
+      my @names = split(/:/, $name);
+      $name = $names[0];
+      $name =~ s/\s/_/g;
+      my $str = $seqentry[1];
+      @sequence = split(/ /, $str);
+      print STDERR "<$name>"."<$str>\n";
     }
     my $current_state = $sequence[0];
     my $begin = 0;
@@ -97,34 +103,33 @@ while (my $seq = <STDIN>)
     my $frame = 0;
     my $length = 0;
 
-
     for(my $i = 1; $i < scalar(@sequence)-1; $i++)
     {
-      if(!($sequence[$i] eq $current_state)){
-        my $nameid = "MYOP."."$name".".$global_id";
+        if(!($sequence[$i] eq $current_state)){
+            my $nameid = "MYOP".".$name".".$id";
             if($current_state eq "start") {
                 $frame  = 0;
-                print "$name\tmyop\tstart_codon\t".($begin + $start_offset_begin+1)."\t".($begin + $start_offset_begin+3)."\t.\t+\t".$frame."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n";
+                print "$name\tmyop\tstart_codon\t".($begin + $start_offset_begin+1 + $first_position)."\t".($begin + $start_offset_begin+3+ $first_position)."\t.\t+\t".$frame."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n";
             } elsif( $current_state eq "stop") {
-                print "$name\tmyop\tstop_codon\t".($begin + $stop_offset_begin+1)."\t".($begin + $stop_offset_begin+3)."\t.\t+\t".((3-$frame)%3)."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n\n";
-                $global_id ++;
+                print "$name\tmyop\tstop_codon\t".($begin + $stop_offset_begin+1+ $first_position)."\t".($begin + $stop_offset_begin+3+ $first_position)."\t.\t+\t".((3-$frame)%3)."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n\n";
+                $id ++;
             } elsif ( $current_state =~ m/^EI(\d)/) {
                 $frame =  0;
-                print "$name\tmyop\tCDS\t".($begin - $start_offset_end + 1)."\t".($i + $donor_offset_begin )."\t.\t+\t".$frame."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n";
+                print "$name\tmyop\tCDS\t".($begin - $start_offset_end + 1+ $first_position)."\t".($i + $donor_offset_begin+ $first_position )."\t.\t+\t".$frame."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n";
                 $frame =(($i + $donor_offset_begin-1)-($begin - $start_offset_end ))%3;
             }elsif ($current_state =~ m/^E(\d)(\d)/) {
                 $frame = $1;
-                print "$name\tmyop\tCDS\t".($begin - $acceptor_offset_end+1)."\t".($i + $donor_offset_begin )."\t.\t+\t".((3-$frame)%3)."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n";
+                print "$name\tmyop\tCDS\t".($begin - $acceptor_offset_end+1+ $first_position)."\t".($i + $donor_offset_begin+ $first_position )."\t.\t+\t".((3-$frame)%3)."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n";
                 $frame = ( $frame + ($i + $donor_offset_begin - 1)-($begin - $acceptor_offset_end) )%3;
             }elsif ($current_state =~ m/^ET(\d)/) {
                 $frame = $1;
-                print "$name\tmyop\tCDS\t".($begin - $acceptor_offset_end+1)."\t".($i + $stop_offset_begin )."\t.\t+\t".((3-$frame)%3)."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n";
+                print "$name\tmyop\tCDS\t".($begin - $acceptor_offset_end+1+ $first_position)."\t".($i + $stop_offset_begin+ $first_position )."\t.\t+\t".((3-$frame)%3)."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n";
                 $frame = ( $frame + ($i + $stop_offset_begin-1) - ($begin - $acceptor_offset_end) )%3;
             }elsif ($current_state =~ m/^ES/) {
                 $frame = 0;
-                print "$name\tmyop\tCDS\t".($begin - $start_offset_end+1)."\t".($i + $stop_offset_begin )."\t.\t+\t".$frame."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n";
+                print "$name\tmyop\tCDS\t".($begin - $start_offset_end+1+ $first_position)."\t".($i + $stop_offset_begin + $first_position)."\t.\t+\t".$frame."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n";
             }  elsif($current_state =~m/rstop/) {
-                $i = process_reverse_strand($name, \@sequence, $begin,  \$global_id);
+                $i = process_reverse_strand($name, \@sequence, $begin,  \$id);
             }
             $begin = $i;
             $current_state = $sequence[$i];
@@ -158,29 +163,29 @@ sub process_reverse_strand {
     for(my $j = $begin_of_gene; $j >= $i-1; $j--)
     {
         if(!($sequence[$j] eq $current_state)) {
-            my $nameid = "MYOP."."$name".".$global_id";
+            my $nameid = "MYOP".".$name".".$$idref";
             if($current_state eq "rstart") {
-              $frame = 0;
-                push @output, "$name\tmyop\tstart_codon\t".($begin - $start_offset_begin - 1)."\t".($begin - $start_offset_begin +1 )."\t.\t-\t".$frame."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n\n";
+                $frame = 0;
+                push @output, "$name\tmyop\tstart_codon\t".($begin - $start_offset_begin - 1+ $first_position)."\t".($begin - $start_offset_begin +1+ $first_position )."\t.\t-\t".$frame."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n\n";
             } elsif( $current_state eq "rstop") {
                 $frame = 0;
                 $$idref ++;
-                push @output, "$name\tmyop\tstop_codon\t".($begin - $stop_offset_begin-1)."\t".($begin - $stop_offset_begin+1)."\t.\t-\t".$frame."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n";
+                push @output, "$name\tmyop\tstop_codon\t".($begin - $stop_offset_begin-1+ $first_position)."\t".($begin - $stop_offset_begin+1+ $first_position)."\t.\t-\t".$frame."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n";
                 $length = 0;
             } elsif ( $current_state =~ m/^rEI(\d)/) {
                 $frame = 0; # first cds always have frame 0
-                push @output, "$name\tmyop\tCDS\t".($j - $donor_offset_begin + 2)."\t".($begin + $start_offset_end + 1)."\t.\t-\t".$frame."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n";
+                push @output, "$name\tmyop\tCDS\t".($j - $donor_offset_begin + 2+ $first_position)."\t".($begin + $start_offset_end + 1+ $first_position)."\t.\t-\t".$frame."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n";
                 $length =  - ($j - $donor_offset_begin  + 2) + ($begin + $start_offset_end + 1 ) + 1;
             }elsif ($current_state =~ m/^rE(\d)(\d)/) {
                 $frame = (3 - ($length - $frame) % 3)%3;
-                push @output, "$name\tmyop\tCDS\t".($j - $donor_offset_begin +2 )."\t".($begin + $acceptor_offset_end+1)."\t.\t-\t".$frame."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n";
+                push @output, "$name\tmyop\tCDS\t".($j - $donor_offset_begin +2+ $first_position )."\t".($begin + $acceptor_offset_end+1+ $first_position)."\t.\t-\t".$frame."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n";
                 $length = - ($j - $donor_offset_begin+2 )+ ($begin + $acceptor_offset_end +1 )+1
             } elsif ($current_state =~ m/^rET(\d)/) {
                 $frame = (3 - ($length - $frame) % 3)%3;
-                push @output, "$name\tmyop\tCDS\t".($j - $stop_offset_begin + 2)."\t".($begin + $acceptor_offset_end + 1)."\t.\t-\t".$frame."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n";
+                push @output, "$name\tmyop\tCDS\t".($j - $stop_offset_begin + 2+ $first_position)."\t".($begin + $acceptor_offset_end + 1+ $first_position)."\t.\t-\t".$frame."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n";
         } elsif ($current_state =~ m/^rES/) {
             $frame = 0;
-            push @output, "$name\tmyop\tCDS\t".($j - $stop_offset_begin + 2 )."\t".($begin + $start_offset_end+1)."\t.\t-\t".$frame."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n";
+            push @output, "$name\tmyop\tCDS\t".($j - $stop_offset_begin + 2+ $first_position )."\t".($begin + $start_offset_end+1+ $first_position)."\t.\t-\t".$frame."\tgene_id \"$nameid\"; transcript_id \"$nameid\";\n";
         }
             $current_state = $sequence[$j];
             $begin = $j;
@@ -192,6 +197,7 @@ sub process_reverse_strand {
     }
     return $begin_of_gene;
 }
+
 sub trim_spaces {
   my $v = shift;
   $v =~ s/^\s+//;     $v =~ s/\s+$//;
