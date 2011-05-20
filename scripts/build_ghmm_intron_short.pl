@@ -129,11 +129,11 @@ state_names = ("N","I0","I1","I2",
 "rEI0","rEI1","rEI2","rES",
 "rET0","rET1","rET2",
 "rstart", "rstop", "racc0", "racc1", "racc2", "rdon0", "rdon1", "rdon2",
-"rE00", "rE01", "rE02", "rE10", "rE11", "rE12","rE20", "rE21", "rE22", "F"
+"rE00", "rE01", "rE02", "rE10", "rE11", "rE12","rE20", "rE21", "rE22"
 )
 observation_symbols = ("A", "C", "G", "T")
 initial_probabilities = ("N": 1.0)
-terminal_probabilities = ("F": 1.0)
+terminal_probabilities = ("N": 1.0)
 
 transitions = (
 )
@@ -306,7 +306,6 @@ don1 = [ observation = donor1_model
 don2 = [ observation = donor2_model
           sequence_length = $donor_signal_length ]
 N = [observation = noncoding_model]
-F = [observation = noncoding_model]
 I0 = [ observation = noncoding_model ]
 Is0 = [ observation = noncoding_model
         duration = intron_length ]
@@ -561,11 +560,9 @@ $transitions{make_transition_str("rI2", "rI2")} = $p;
 $transitions{make_transition_str("rI2", "rdon2")} = 1.0 - $p;
 $transitions{make_transition_str("rIs2", "rdon2")} = 1.0;
 
-$transitions{make_transition_str( "F", "F" )} =  1.0;
-$transitions{make_transition_str( "N", "start" )} = $pforward * ((1.0/$intergenic_length) - $final_state_prob);
-$transitions{make_transition_str( "N", "rstop" )} = (1.0 - $pforward) * ((1.0/$intergenic_length) - $final_state_prob);
+$transitions{make_transition_str( "N", "start" )} = $pforward * ((1.0/$intergenic_length) );
+$transitions{make_transition_str( "N", "rstop" )} = (1.0 - $pforward) * ((1.0/$intergenic_length) );
 $transitions{make_transition_str("N", "N")} = 1.0 - (1.0/$intergenic_length);
-$transitions{make_transition_str( "N", "F" )} = $final_state_prob;
 $transitions{make_transition_str( "stop", "N" )} = 1;
 $transitions{make_transition_str( "rstart", "N" ) }= 1;
 
