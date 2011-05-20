@@ -66,7 +66,6 @@ my $stop_offset_begin = ($fixed_stop_offset);
 my $donor_offset_begin = ($fixed_donor_offset);
 my $acceptor_offset_end = ($exon_length_acceptor);
 
-
 my $id = 0;
 while (my $seq = <STDIN>)
 {
