@@ -138,22 +138,12 @@ terminal_probabilities = ("N": 1.0)
 transitions = (
 )
 
-acceptor0_model =  "../ghmm/model/acceptor_composed.model"
-acceptor1_model =  "../ghmm/model/acceptor_composed.model"
-acceptor2_model =  "../ghmm/model/acceptor_composed.model"
-racceptor0_model =  "../ghmm/model/acceptor_composed_rev.model"
-racceptor1_model =  "../ghmm/model/acceptor_composed_rev.model"
-racceptor2_model =  "../ghmm/model/acceptor_composed_rev.model"
-
-donor0_model = "../ghmm/model/donor_composed.model"
-donor1_model = "../ghmm/model/donor_composed.model"
-donor2_model = "../ghmm/model/donor_composed.model"
-rdonor0_model = "../ghmm/model/donor_composed_rev.model"
-rdonor1_model = "../ghmm/model/donor_composed_rev.model"
-rdonor2_model = "../ghmm/model/donor_composed_rev.model"
+acceptor_model =  "../ghmm/model/acceptor_composed.model"
+racceptor_model =  "../ghmm/model/acceptor_composed_rev.model"
+donor_model = "../ghmm/model/donor_composed.model"
+rdonor_model = "../ghmm/model/donor_composed_rev.model"
 start_model = "../ghmm/model/start_composed.model"
 stop_model = "../ghmm/model/stop.model"
-rdonor_model = "../ghmm/model/donor_rev.model"
 rstart_model = "../ghmm/model/start_composed_rev.model"
 rstop_model = "../ghmm/model/stop_rev.model"
 cds_model = "model/cds.model"
@@ -293,17 +283,17 @@ start = [ observation = start_model
           sequence_length = $start_signal_length ]
 stop = [ observation = stop_model
          sequence_length = $stop_codon_length]
-acc0 = [ observation = acceptor0_model
+acc0 = [ observation = acceptor_model
           sequence_length = $acceptor_signal_length ]
-acc1 = [ observation = acceptor1_model
+acc1 = [ observation = acceptor_model
           sequence_length = $acceptor_signal_length ]
-acc2 = [ observation = acceptor2_model
+acc2 = [ observation = acceptor_model
           sequence_length = $acceptor_signal_length ]
-don0 = [ observation = donor0_model
+don0 = [ observation = donor_model
           sequence_length = $donor_signal_length ]
-don1 = [ observation = donor1_model
+don1 = [ observation = donor_model
           sequence_length = $donor_signal_length ]
-don2 = [ observation = donor2_model
+don2 = [ observation = donor_model
           sequence_length = $donor_signal_length ]
 N = [observation = noncoding_model]
 I0 = [ observation = noncoding_model ]
@@ -404,17 +394,17 @@ rstart = [ observation = rstart_model
           sequence_length = $start_signal_length ]
 rstop = [ observation = rstop_model
           sequence_length = $stop_codon_length ]
-racc0 = [ observation = racceptor0_model
+racc0 = [ observation = racceptor_model
           sequence_length = $acceptor_signal_length  ]
-racc1 = [ observation = racceptor1_model
+racc1 = [ observation = racceptor_model
           sequence_length = $acceptor_signal_length  ]
-racc2 = [ observation = racceptor2_model
+racc2 = [ observation = racceptor_model
           sequence_length = $acceptor_signal_length  ]
-rdon0 = [ observation = rdonor0_model
+rdon0 = [ observation = rdonor_model
           sequence_length = $donor_signal_length ]
-rdon1 = [ observation = rdonor1_model
+rdon1 = [ observation = rdonor_model
           sequence_length = $donor_signal_length ]
-rdon2 = [ observation = rdonor2_model
+rdon2 = [ observation = rdonor_model
           sequence_length = $donor_signal_length ]
 EOF
 open (GHMM, ">ghmm/model/ghmm_intron_short.model") or die "model/ghmm_intron_short.model: $!";
