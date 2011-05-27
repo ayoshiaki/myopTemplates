@@ -447,7 +447,7 @@ close(GHMM);
 
 ###################
 
-my $final_state_prob =9.95e-5;
+my $final_state_prob = $metapar{final_state_probability};
 
 
 my %estimated;
