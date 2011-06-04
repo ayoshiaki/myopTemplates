@@ -503,9 +503,6 @@ print STDERR "P(L=d) = $pd\n";
 print STDERR "P(L=d+1) = $pd1\n";
 
 my %transitions;
-if ($estimated{make_transition_str("start", "ES")} == 0) {
-    system ("cp model/initial.model model/single.model");
-}
 
 
 $transitions{make_transition_str("don0", "Is0")} = $pshort;
