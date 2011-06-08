@@ -137,23 +137,12 @@ terminal_probabilities = ("F": 1.0)
 
 transitions = (
 )
-
-acceptor0_model =  "../ghmm/model/acceptor_composed.model"
-acceptor1_model =  "../ghmm/model/acceptor_composed.model"
-acceptor2_model =  "../ghmm/model/acceptor_composed.model"
-racceptor0_model =  "../ghmm/model/acceptor_composed_rev.model"
-racceptor1_model =  "../ghmm/model/acceptor_composed_rev.model"
-racceptor2_model =  "../ghmm/model/acceptor_composed_rev.model"
-
-donor0_model = "../ghmm/model/donor_composed.model"
-donor1_model = "../ghmm/model/donor_composed.model"
-donor2_model = "../ghmm/model/donor_composed.model"
-rdonor0_model = "../ghmm/model/donor_composed_rev.model"
-rdonor1_model = "../ghmm/model/donor_composed_rev.model"
-rdonor2_model = "../ghmm/model/donor_composed_rev.model"
+acceptor_model =  "../ghmm/model/acceptor_composed.model"
+racceptor_model =  "../ghmm/model/acceptor_composed_rev.model"
+donor_model = "../ghmm/model/donor_composed.model"
+rdonor_model = "../ghmm/model/donor_composed_rev.model"
 start_model = "../ghmm/model/start_composed.model"
 stop_model = "../ghmm/model/stop.model"
-rdonor_model = "../ghmm/model/donor_rev.model"
 rstart_model = "../ghmm/model/start_composed_rev.model"
 rstop_model = "../ghmm/model/stop_rev.model"
 cds_model = "model/cds.model"
@@ -164,6 +153,7 @@ internal_exon_duration = "../ghmm/model/internal.model"
 final_exon_duration = "../ghmm/model/final.model"
 single_duration = "../ghmm/model/single.model"
 intron_length = "../ghmm/model/intron_length.model"
+
 
 EI_duration_0 = [ model_name="PhasedRunLengthDistribution"
                   input_phase = 0
@@ -227,83 +217,99 @@ E2_duration = [ model_name="PhasedRunLengthDistribution"
                 model = internal_exon_duration ]
 EI0 = [ observation = cds_model
         duration = EI_duration_0
+        extend_emission = ($exon_length_start, $exon_length_donor)
         input_phase = $exon_initial_iphase
         output_phase = $exon_initial_0_ophase]
 EI1 = [ observation = cds_model
         duration = EI_duration_1
+        extend_emission = ($exon_length_start, $exon_length_donor)
         input_phase = $exon_initial_iphase
         output_phase = $exon_initial_1_ophase]
 EI2 = [ observation = cds_model
         duration = EI_duration_2
+        extend_emission = ($exon_length_start, $exon_length_donor)
         input_phase = $exon_initial_iphase
         output_phase = $exon_initial_2_ophase]
 ES = [ observation = cds_model
        duration = ES_duration
+       extend_emission = ($exon_length_start, $exon_length_stop)
        input_phase = $exon_initial_iphase
        output_phase = $exon_single_ophase]
 ET0 = [ observation = cds_model
         duration = ET0_duration
+        extend_emission = ($exon_length_acceptor, $exon_length_stop)
         input_phase = $exon_final_0_iphase
         output_phase = $exon_final_ophase]
 ET1 = [ observation = cds_model
         duration = ET1_duration
+        extend_emission = ($exon_length_acceptor, $exon_length_stop)
         input_phase = $exon_final_1_iphase
         output_phase = $exon_final_ophase]
 ET2 = [ observation  = cds_model
         duration = ET2_duration
+        extend_emission = ($exon_length_acceptor, $exon_length_stop)
         input_phase  = $exon_final_2_iphase
         output_phase =  $exon_final_ophase]
 E00 = [ observation  = cds_model
         duration = E0_duration
+        extend_emission = ($exon_length_acceptor, $exon_length_donor)
         input_phase  = $exon_internal_00_iphase
         output_phase = $exon_internal_00_ophase ]
 E01= [ observation  = cds_model
        duration = E1_duration
+        extend_emission = ($exon_length_acceptor, $exon_length_donor)
        input_phase  = $exon_internal_01_iphase
        output_phase =  $exon_internal_01_ophase ]
 E02= [ observation  = cds_model
        duration = E2_duration
+        extend_emission = ($exon_length_acceptor, $exon_length_donor)
        input_phase  = $exon_internal_02_iphase
        output_phase =  $exon_internal_02_ophase ]
 E10= [ observation  = cds_model
         duration = E2_duration
+        extend_emission = ($exon_length_acceptor, $exon_length_donor)
        input_phase  = $exon_internal_10_iphase
        output_phase =  $exon_internal_10_ophase ]
 E11= [ observation  = cds_model
        duration = E0_duration
+        extend_emission = ($exon_length_acceptor, $exon_length_donor)
        input_phase  = $exon_internal_11_iphase
        output_phase =  $exon_internal_11_ophase ]
 E12= [ observation  = cds_model
         duration = E1_duration
+        extend_emission = ($exon_length_acceptor, $exon_length_donor)
         input_phase  = $exon_internal_12_iphase
         output_phase =  $exon_internal_12_ophase ]
 E20= [ observation  = cds_model
         duration = E1_duration
+        extend_emission = ($exon_length_acceptor, $exon_length_donor)
         input_phase  = $exon_internal_20_iphase
         output_phase =  $exon_internal_20_ophase ]
 E21= [ observation  = cds_model
         duration = E2_duration
+       extend_emission = ($exon_length_acceptor, $exon_length_donor)
         input_phase  = $exon_internal_21_iphase
         output_phase =  $exon_internal_21_ophase ]
 E22= [ observation  = cds_model
-        duration = E0_duration
-        input_phase  = $exon_internal_22_iphase
-        output_phase =  $exon_internal_22_ophase ]
+       duration = E0_duration
+       extend_emission = ($exon_length_acceptor, $exon_length_donor)
+       input_phase  = $exon_internal_22_iphase
+       output_phase =  $exon_internal_22_ophase ]
 start = [ observation = start_model
           sequence_length = $start_signal_length ]
 stop = [ observation = stop_model
-         sequence_length = $stop_codon_length]
-acc0 = [ observation = acceptor0_model
+         sequence_length = $stop_signal_length]
+acc0 = [ observation = acceptor_model
           sequence_length = $acceptor_signal_length ]
-acc1 = [ observation = acceptor1_model
+acc1 = [ observation = acceptor_model
           sequence_length = $acceptor_signal_length ]
-acc2 = [ observation = acceptor2_model
+acc2 = [ observation = acceptor_model
           sequence_length = $acceptor_signal_length ]
-don0 = [ observation = donor0_model
+don0 = [ observation = donor_model
           sequence_length = $donor_signal_length ]
-don1 = [ observation = donor1_model
+don1 = [ observation = donor_model
           sequence_length = $donor_signal_length ]
-don2 = [ observation = donor2_model
+don2 = [ observation = donor_model
           sequence_length = $donor_signal_length ]
 N = [observation = noncoding_model]
 F = [observation = noncoding_model]
@@ -339,84 +345,101 @@ rIf2 = [ observation = noncoding_model
        sequence_length = $intron_short_length ]
 rEI0  = [ observation = rcds_model
           duration = EI_duration_0
+          extend_emission = ($exon_length_donor, $exon_length_start)
           input_phase = $rexon_initial_0_iphase
           output_phase = $rexon_initial_ophase ]
 rEI1 = [ observation = rcds_model
          duration = EI_duration_1
+         extend_emission = ($exon_length_donor, $exon_length_start)
          input_phase = $rexon_initial_1_iphase
          output_phase = $rexon_initial_ophase ]
 rEI2 = [ observation = rcds_model
          duration = EI_duration_2
+         extend_emission = ($exon_length_donor, $exon_length_start)
          input_phase = $rexon_initial_2_iphase
          output_phase = $rexon_initial_ophase ]
 rES = [ observation =rcds_model
         duration = ES_duration
+        extend_emission = ($exon_length_stop, $exon_length_start)
         input_phase = $rexon_single_iphase
         output_phase = $rexon_single_ophase ]
 rET0 = [ observation = rcds_model
          duration = ET0_duration
+         extend_emission = ($exon_length_stop, $exon_length_acceptor)
          input_phase = $rexon_final_iphase
          output_phase = $rexon_final_0_ophase ]
 rET1 = [ observation = rcds_model
          duration = ET1_duration
+         extend_emission = ($exon_length_stop, $exon_length_acceptor)
          input_phase = $rexon_final_iphase
          output_phase = $rexon_final_1_ophase ]
 rET2 = [ observation  = rcds_model
          duration = ET2_duration
+         extend_emission = ($exon_length_stop, $exon_length_acceptor)
          input_phase  = $rexon_final_iphase
          output_phase = $rexon_final_2_ophase ]
 rE00 = [ observation  = rcds_model
          duration = E0_duration
+         extend_emission = ($exon_length_donor, $exon_length_acceptor)
          input_phase  = $rexon_internal_00_iphase
          output_phase = $rexon_internal_00_ophase ]
 rE01= [ observation  = rcds_model
         duration = E2_duration
+        extend_emission = ($exon_length_donor, $exon_length_acceptor)
         input_phase  = $rexon_internal_01_iphase
         output_phase = $rexon_internal_01_ophase ]
 rE02= [ observation  = rcds_model
         duration = E1_duration
+        extend_emission = ($exon_length_donor, $exon_length_acceptor)
         input_phase  = $rexon_internal_02_iphase
         output_phase = $rexon_internal_02_ophase ]
 rE10= [ observation  = rcds_model
         duration = E1_duration
+        extend_emission = ($exon_length_donor, $exon_length_acceptor)
         input_phase  = $rexon_internal_10_iphase
         output_phase = $rexon_internal_10_ophase ]
 rE11= [ observation  = rcds_model
         duration = E0_duration
+        extend_emission = ($exon_length_donor, $exon_length_acceptor)
         input_phase  = $rexon_internal_11_iphase
         output_phase = $rexon_internal_11_ophase ]
 rE12= [ observation  = rcds_model
         duration = E2_duration
+        extend_emission = ($exon_length_donor, $exon_length_acceptor)
         input_phase  = $rexon_internal_12_iphase
         output_phase = $rexon_internal_12_ophase ]
 rE20= [ observation  = rcds_model
         duration = E2_duration
+        extend_emission = ($exon_length_donor, $exon_length_acceptor)
         input_phase  = $rexon_internal_20_iphase
         output_phase = $rexon_internal_20_ophase ]
 rE21= [ observation  = rcds_model
         duration = E1_duration
+        extend_emission = ($exon_length_donor, $exon_length_acceptor)
         input_phase  = $rexon_internal_21_iphase
         output_phase = $rexon_internal_21_ophase ]
 rE22= [ observation  = rcds_model
         duration = E0_duration
+        extend_emission = ($exon_length_donor, $exon_length_acceptor)
         input_phase  = $rexon_internal_22_iphase
         output_phase = $rexon_internal_22_ophase ]
 rstart = [ observation = rstart_model
           sequence_length = $start_signal_length ]
 rstop = [ observation = rstop_model
-          sequence_length = $stop_codon_length ]
-racc0 = [ observation = racceptor0_model
+          sequence_length = $stop_signal_length ]
+racc0 = [ observation = racceptor_model
           sequence_length = $acceptor_signal_length  ]
-racc1 = [ observation = racceptor1_model
+racc1 = [ observation = racceptor_model
           sequence_length = $acceptor_signal_length  ]
-racc2 = [ observation = racceptor2_model
+racc2 = [ observation = racceptor_model
           sequence_length = $acceptor_signal_length  ]
-rdon0 = [ observation = rdonor0_model
+rdon0 = [ observation = rdonor_model
           sequence_length = $donor_signal_length ]
-rdon1 = [ observation = rdonor1_model
+rdon1 = [ observation = rdonor_model
           sequence_length = $donor_signal_length ]
-rdon2 = [ observation = rdonor2_model
+rdon2 = [ observation = rdonor_model
           sequence_length = $donor_signal_length ]
+
 EOF
 open (GHMM, ">ghmm/model/ghmm_fixed_transition.model") or die "model/ghmm_fixed_transition.model: $!";
 print GHMM $ghmm;
