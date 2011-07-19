@@ -442,9 +442,7 @@ foreach my $line (<MODEL>) {
 }
 close(MODEL);
 
-my $genes_forward = `cat dataset/train.gtf | grep "+" | wc -l`;
-my $genes_reverse = `cat dataset/train.gtf | grep "-" | wc -l`;
-my $pforward = ($genes_forward + 0.5) / ($genes_reverse + $genes_forward + 1.0);
+my $pforward = 0.5;
 
 my $intron_lengths =`myop-sequence_length.pl < ghmm/dataset/intron.fasta`;
 $intron_lengths =~ s/(.+):\t//g;
@@ -530,15 +528,12 @@ $transitions{make_transition_str("I2", "acc2")} = 1.0 - $p;
 $transitions{make_transition_str("racc0", "rI0")} = 1.0;
 $transitions{make_transition_str("rI0", "rI0")} = $p;
 $transitions{make_transition_str("rI0", "rdon0")} = 1.0 - $p;
-
 $transitions{make_transition_str("racc1", "rI1")} = 1.0;
 $transitions{make_transition_str("rI1", "rI1")} = $p;
 $transitions{make_transition_str("rI1", "rdon1")} = 1.0 - $p;
-
 $transitions{make_transition_str("racc2", "rI2")} = 1.0;
 $transitions{make_transition_str("rI2", "rI2")} = $p;
 $transitions{make_transition_str("rI2", "rdon2")} = 1.0 - $p;
-
 $transitions{make_transition_str( "F", "F" )} =  1.0;
 $transitions{make_transition_str( "N", "start" )} = $pforward * ((1.0/$intergenic_length) - $final_state_prob);
 $transitions{make_transition_str( "N", "rstop" )} = (1.0 - $pforward) * ((1.0/$intergenic_length) - $final_state_prob);
@@ -546,29 +541,28 @@ $transitions{make_transition_str("N", "N")} = 1.0 - (1.0/$intergenic_length);
 $transitions{make_transition_str( "N", "F" )} = $final_state_prob;
 $transitions{make_transition_str( "stop", "N" )} = 1;
 $transitions{make_transition_str( "rstart", "N" ) }= 1;
-
-$transitions{make_transition_str("start","ES")} = $estimated{make_transition_str("start", "ES")};
+$transitions{make_transition_str("start","ES")} = 0.1;
 $transitions{make_transition_str("ES","stop")} = 1.0;
-$transitions{make_transition_str("rstop","rES")} = $estimated{make_transition_str("start", "ES")};
+$transitions{make_transition_str("rstop","rES")} = 0.1;
 $transitions{make_transition_str("rES","rstart")} = 1.0;
-$transitions{make_transition_str("start", "EI0")} = $estimated{make_transition_str("start","EI0")};
-$transitions{make_transition_str("start", "EI1")} = $estimated{make_transition_str("start","EI1")};
-$transitions{make_transition_str("start", "EI2")} = $estimated{make_transition_str("start","EI2")};
+$transitions{make_transition_str("start", "EI0")} = 0.3;
+$transitions{make_transition_str("start", "EI1")} = 0.3;
+$transitions{make_transition_str("start", "EI2")} = 0.3;
 $transitions{make_transition_str("EI0", "don1")} = 1.0;
 $transitions{make_transition_str("EI1", "don2")} = 1.0;
 $transitions{make_transition_str("EI2", "don0")} = 1.0;
-$transitions{make_transition_str("acc0", "ET0")} = $estimated{make_transition_str("acc0","ET0")};
-$transitions{make_transition_str("acc0", "E00")} = $estimated{make_transition_str("acc0","E00")};
-$transitions{make_transition_str("acc0", "E01")} = $estimated{make_transition_str("acc0","E01")};
-$transitions{make_transition_str("acc0", "E02")} = $estimated{make_transition_str("acc0","E02")};
-$transitions{make_transition_str("acc1", "ET1")} = $estimated{make_transition_str("acc1","ET1")};
-$transitions{make_transition_str("acc1", "E10")} = $estimated{make_transition_str("acc1","E10")};
-$transitions{make_transition_str("acc1", "E11")} = $estimated{make_transition_str("acc1","E11")};
-$transitions{make_transition_str("acc1", "E12")} = $estimated{make_transition_str("acc1","E12")};
-$transitions{make_transition_str("acc2", "ET2")} = $estimated{make_transition_str("acc2","ET2")};
-$transitions{make_transition_str("acc2", "E20")} = $estimated{make_transition_str("acc2","E20")};
-$transitions{make_transition_str("acc2", "E21")} = $estimated{make_transition_str("acc2","E21")};
-$transitions{make_transition_str("acc2", "E22")} = $estimated{make_transition_str("acc2","E22")};
+$transitions{make_transition_str("acc0", "ET0")} = 0.1;
+$transitions{make_transition_str("acc0", "E00")} = 0.3;
+$transitions{make_transition_str("acc0", "E01")} = 0.3;
+$transitions{make_transition_str("acc0", "E02")} = 0.3;
+$transitions{make_transition_str("acc1", "ET1")} = 0.1;
+$transitions{make_transition_str("acc1", "E10")} = 0.3;
+$transitions{make_transition_str("acc1", "E11")} = 0.3;
+$transitions{make_transition_str("acc1", "E12")} = 0.3;
+$transitions{make_transition_str("acc2", "ET2")} = 0.1;
+$transitions{make_transition_str("acc2", "E20")} = 0.3;
+$transitions{make_transition_str("acc2", "E21")} = 0.3;
+$transitions{make_transition_str("acc2", "E22")} = 0.3;
 $transitions{make_transition_str("ET0", "stop")} = 1.0;
 $transitions{make_transition_str("ET1", "stop")} = 1.0;
 $transitions{make_transition_str("ET2", "stop")} = 1.0;
@@ -581,29 +575,25 @@ $transitions{make_transition_str("E12", "don0")} = 1.0;
 $transitions{make_transition_str("E20", "don1")} = 1.0;
 $transitions{make_transition_str("E21", "don2")} = 1.0;
 $transitions{make_transition_str("E22", "don0")} = 1.0;
-$transitions{make_transition_str("rstop","rET0")} = $estimated{make_transition_str("rstop","rET0")};
-$transitions{make_transition_str("rstop","rET1")} = $estimated{make_transition_str("rstop","rET1")};
-$transitions{make_transition_str("rstop","rET2")} = $estimated{make_transition_str("rstop","rET2")};
-
+$transitions{make_transition_str("rstop","rET0")} = 0.3;
+$transitions{make_transition_str("rstop","rET1")} = 0.3;
+$transitions{make_transition_str("rstop","rET2")} = 0.3;
+$transitions{make_transition_str("rstop","rES")} = 0.1;
 $transitions{make_transition_str("rET2","racc2")} = 1.0;
 $transitions{make_transition_str("rET0","racc0")} = 1.0;
 $transitions{make_transition_str("rET1","racc1")} = 1.0;
-
-$transitions{make_transition_str("rdon1","rEI0")} = $estimated{make_transition_str("rdon1","rEI0")};
-$transitions{make_transition_str("rdon1","rE00")} = $estimated{make_transition_str("rdon1","rE00")};
-$transitions{make_transition_str("rdon1","rE01")} = $estimated{make_transition_str("rdon1","rE01")};
-$transitions{make_transition_str("rdon1","rE02")} = $estimated{make_transition_str("rdon1","rE02")};
-
-$transitions{make_transition_str("rdon0","rEI2")} = $estimated{make_transition_str("rdon0","rEI2")};
-$transitions{make_transition_str("rdon0","rE20")} = $estimated{make_transition_str("rdon0","rE20")};
-$transitions{make_transition_str("rdon0","rE21")} = $estimated{make_transition_str("rdon0","rE21")};
-$transitions{make_transition_str("rdon0","rE22")} = $estimated{make_transition_str("rdon0","rE22")};
-
-$transitions{make_transition_str("rdon2","rEI1")} = $estimated{make_transition_str("rdon2","rEI1")};
-$transitions{make_transition_str("rdon2","rE10")} = $estimated{make_transition_str("rdon2","rE10")};
-$transitions{make_transition_str("rdon2","rE11")} = $estimated{make_transition_str("rdon2","rE11")};
-$transitions{make_transition_str("rdon2","rE12")} = $estimated{make_transition_str("rdon2","rE12")};
-
+$transitions{make_transition_str("rdon1","rEI0")} = 0.1;
+$transitions{make_transition_str("rdon1","rE00")} = 0.3;
+$transitions{make_transition_str("rdon1","rE01")} = 0.3;
+$transitions{make_transition_str("rdon1","rE02")} = 0.3;
+$transitions{make_transition_str("rdon0","rEI2")} = 0.1;
+$transitions{make_transition_str("rdon0","rE20")} = 0.3;
+$transitions{make_transition_str("rdon0","rE21")} = 0.3;
+$transitions{make_transition_str("rdon0","rE22")} = 0.3;
+$transitions{make_transition_str("rdon2","rEI1")} = 0.1;
+$transitions{make_transition_str("rdon2","rE10")} = 0.3;
+$transitions{make_transition_str("rdon2","rE11")} = 0.3;
+$transitions{make_transition_str("rdon2","rE12")} = 0.3;
 $transitions{make_transition_str("rE00","racc0")} = 1.0;
 $transitions{make_transition_str("rE01","racc1")} = 1.0;
 $transitions{make_transition_str("rE02","racc2")} = 1.0;
@@ -613,7 +603,6 @@ $transitions{make_transition_str("rE12","racc2")} = 1.0;
 $transitions{make_transition_str("rE20","racc0")} = 1.0;
 $transitions{make_transition_str("rE21","racc1")} = 1.0;
 $transitions{make_transition_str("rE22","racc2")} = 1.0;
-
 $transitions{make_transition_str("rEI0","rstart")} = 1.0;
 $transitions{make_transition_str("rEI1","rstart")} = 1.0;
 $transitions{make_transition_str("rEI2","rstart")} = 1.0;
