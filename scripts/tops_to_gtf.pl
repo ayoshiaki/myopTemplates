@@ -66,41 +66,29 @@ my $stop_offset_begin = ($fixed_stop_offset);
 my $donor_offset_begin = ($fixed_donor_offset);
 my $acceptor_offset_end = ($exon_length_acceptor);
 
-my $id = 0;
 while (my $seq = <STDIN>)
 {
-
-
     my $name;
     my @sequence;
-    if($seq =~ m/^>(.*)/) {
-        $name = $1;
-        my @names = split(/:/, $name);
-        $name = $names[0];
-        $name =~ s/\s/_/g;
-        my $str = <STDIN>;
-        chomp($str);
-        @sequence = split(/ /, $str);
-    } else {
-      $seq =~ /(<.+>),(.+)/;
-      my $id = $1;
-      my $seq2 = $2;
-      $id =~ /(.+):(\d+),(\d+)/;
-      $first_position = ($2-1);
-      my @seqentry = split(/:\t/, $seq2);
-      $name = $seqentry[0];
-      my @names = split(/:/, $name);
-      $name = $names[0];
-      $name =~ s/\s/_/g;
-      my $str = $seqentry[1];
-      @sequence = split(/ /, $str);
+
+    if(!($seq =~ /(<.+>),(.+)/)){
+      die "ERROR: tops_to_gtf.pl: invalid entry format\n";
     }
+    my $id = $1;
+    my $seq2 = $2;
+    $id =~ /<(.+):(\d+),(\d+)/;
+    $name = $1;
+    $first_position = ($2-1);
+    my @seqentry = split(/:\t/, $seq2);
+    my $str = $seqentry[1];
+    @sequence = split(/ /, $str);
     my $current_state = $sequence[0];
     my $begin = 0;
     push @sequence, "+_+_+_+_+_+_+";
     my $frame = 0;
     my $length = 0;
 
+    $id = 0;
     for(my $i = 1; $i < scalar(@sequence)-1; $i++)
     {
         if(!($sequence[$i] eq $current_state)){
