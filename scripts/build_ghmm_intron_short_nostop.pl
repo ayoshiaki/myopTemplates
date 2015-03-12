@@ -514,9 +514,14 @@ my $seq = "seq: $intron_short_length\n";
 my ($prob_length_d, @lixo) = split("\n", `echo "$seq" | evaluate -m ghmm/model/intron_length.model | awk -F" " '{print\$2}'`);
 my $probd = exp($prob_length_d);
 
+my $mlong = 0;
 print STDERR "P(m=d) = ".$probd."\n";
-my $mlong = $num_long_introns/ ($total_introns - $num_short_introns) - $intron_short_length;
-if (($mlong < 0) || ($total_introns - $num_short_introns) == 0) {
+if (($total_introns - $num_short_introns) == 0) {
+    $mlong = 10;
+} else {
+    $mlong = $num_long_introns/ ($total_introns - $num_short_introns) - $intron_short_length;
+}
+if ($mlong < 0) {
     $mlong = 10;
 }
 
