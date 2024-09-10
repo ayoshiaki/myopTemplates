@@ -492,7 +492,7 @@ for(my $i = $intron_short_length+1; $i <= $max_intron_length; $i++)
 
 
 my $seq = "seq: $intron_short_length\n";
-my ($prob_length_d, @lixo) = split("\n", `echo "$seq" | evaluate -m ghmm/model/intron_length.model | awk -F" " '{print\$2}'`);
+my ($prob_length_d, @lixo) = split("\n", `echo "$seq" | tops-evaluate -m ghmm/model/intron_length.model | awk -F" " '{print\$2}'`);
 my $probd = exp($prob_length_d);
 
 print STDERR "P(m=d) = ".$probd."\n";
